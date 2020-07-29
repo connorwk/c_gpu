@@ -12,17 +12,18 @@ int main( int argc, char ** argv )
     SDL_Surface * uvtemp = SDL_LoadBMP( "uvtest.bmp" );
     if ( uvtemp == NULL ) { printf( "SDL Texture load fail, error: %s\n", SDL_GetError() ); return 0; }
 
+    uvwind = SDL_CreateWindow( "UV Viewer",
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+        uvtemp->w, uvtemp->h,
+        SDL_WINDOW_SHOWN );
+
     wind = SDL_CreateWindow( *argv,
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         SCREEN_WIDTH, SCREEN_HEIGHT,
         SDL_WINDOW_SHOWN );
 
     argc--; argv++;
-
-    uvwind = SDL_CreateWindow( "UV Viewer",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        uvtemp->w, uvtemp->h,
-        SDL_WINDOW_SHOWN );
+    
 
     if ( wind == NULL || uvwind == NULL ) { printf( "SDL Window fail, error: %s\n", SDL_GetError() ); return 0; }
 
@@ -61,7 +62,7 @@ int main( int argc, char ** argv )
         }}
     };
 
-    for ( int i = 0; i < 1; i++ )
+    for ( int i = 0; i < 2; i++ )
     {
         rasterizeTriangle(test + i, testuv + i);
     }
