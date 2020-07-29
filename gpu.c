@@ -37,7 +37,7 @@ int main( int argc, char ** argv )
     SDL_UpdateWindowSurface( uvwind );
 
     struct Triangle test[8] = {
-        {{
+        {{ // Top left
             {70,  75,  5},
             {250, 25,  1},
             {250, 250, 1}
@@ -47,7 +47,7 @@ int main( int argc, char ** argv )
             {70,  200, 5},
             {250, 250, 1}
         }},
-        {{
+        {{ // Bottom left
             {50,  250, 1},
             {250, 250, 1},
             {250, 450, 1}
@@ -57,7 +57,7 @@ int main( int argc, char ** argv )
             {70,  430, 5},
             {250, 450, 1}
         }},
-        {{
+        {{ // Top right
             {350, 45,  5},
             {500, 45,  5},
             {550, 250, 1}
@@ -67,7 +67,7 @@ int main( int argc, char ** argv )
             {300, 250, 1},
             {550, 250, 1}
         }},
-        {{
+        {{ // Bottom right
             {300, 250, 1},
             {500, 250, 1},
             {550, 450, 1}
