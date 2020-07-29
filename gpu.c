@@ -36,20 +36,50 @@ int main( int argc, char ** argv )
     SDL_FreeSurface( uvtemp );
     SDL_UpdateWindowSurface( uvwind );
 
-    struct Triangle test[2] = {
+    struct Triangle test[8] = {
         {{
-            {100, 150, 5},
-            {400, 100, 1},
-            {400, 400, 1}
+            {70,  75,  5},
+            {250, 25,  1},
+            {250, 250, 1}
         }},
         {{
-            {100, 150, 5},
-            {100, 350, 5},
-            {400, 400, 1},
+            {70,  75,  5},
+            {70,  200, 5},
+            {250, 250, 1}
+        }},
+        {{
+            {50,  250, 1},
+            {250, 250, 1},
+            {250, 450, 1}
+        }},
+        {{
+            {50,  250, 5},
+            {50,  450, 5},
+            {250, 450, 1}
+        }},
+        {{
+            {350, 45,  5},
+            {500, 45,  5},
+            {550, 250, 1}
+        }},
+        {{
+            {350, 45,  5},
+            {300, 250, 1},
+            {550, 250, 1}
+        }},
+        {{
+            {300, 250, 1},
+            {500, 250, 1},
+            {550, 450, 1}
+        }},
+        {{
+            {300, 250, 1},
+            {350, 450, 1},
+            {550, 450, 1}
         }}
     };
 
-    struct Triangle testuv[2] = {
+    struct Triangle testuv[8] = {
         {{
             {256, 256, 0},
             {768, 256, 0},
@@ -58,11 +88,41 @@ int main( int argc, char ** argv )
         {{
             {256, 256, 0},
             {256, 768, 0},
-            {768, 768, 0},
+            {768, 768, 0}
+        }},
+	{{
+            {256, 256, 0},
+            {768, 256, 0},
+            {768, 768, 0}
+        }},
+        {{
+            {256, 256, 0},
+            {256, 768, 0},
+            {768, 768, 0}
+        }},
+	{{
+            {256, 256, 0},
+            {768, 256, 0},
+            {768, 768, 0}
+        }},
+        {{
+            {256, 256, 0},
+            {256, 768, 0},
+            {768, 768, 0}
+        }},
+	{{
+            {256, 256, 0},
+            {768, 256, 0},
+            {768, 768, 0}
+        }},
+        {{
+            {256, 256, 0},
+            {256, 768, 0},
+            {768, 768, 0}
         }}
     };
 
-    for ( int i = 0; i < 2; i++ )
+    for ( int i = 0; i < 8; i++ )
     {
         rasterizeTriangle(test + i, testuv + i);
     }
@@ -124,6 +184,7 @@ void rasterizeTriangle( struct Triangle * tri, struct Triangle * uv )
     struct Triangle rord = *tri;
     struct Vector pt, end;
 
+    // Re-order Vectors so they go top to bottom in y order.
     if ( rord.v[0].y > rord.v[1].y ) { pt = rord.v[0]; rord.v[0] = rord.v[1]; rord.v[1] = pt; }
     if ( rord.v[0].y > rord.v[2].y ) { pt = rord.v[0]; rord.v[0] = rord.v[2]; rord.v[2] = pt; }
     if ( rord.v[1].y > rord.v[2].y ) { pt = rord.v[1]; rord.v[1] = rord.v[2]; rord.v[2] = pt; }
