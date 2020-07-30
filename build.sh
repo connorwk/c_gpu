@@ -8,5 +8,5 @@ then
 	  --mount type=bind,source="$(pwd)",target=/build-path \
 	  sdl2-build-env:1.0
 else
-	docker start sdl2-build
+	docker start -a sdl2-build
 fi
