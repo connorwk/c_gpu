@@ -192,24 +192,15 @@ struct Vector crossProduct(struct Vector vecta, struct Vector vectb)
 void rasterizeTriangle( struct Triangle * tri, struct Triangle * uv )
 {
     int i;
-    float uv_maxx, uv_maxy, uv_minx, uv_miny, maxx, maxy, minx, miny, minz, maxz, s, t;
-    struct Triangle uvord = *uv;
+    float maxx, maxy, minx, miny, s, t;
     struct Triangle rord = *tri;
-    struct Vector vs1, vs2, q, uv_o, uv_c;
+    struct Vector vs1, vs2, q, uv_o;
 
     /* get the bounding box of the triangle */
     maxx = fmaxf(rord.v[0].x, fmaxf(rord.v[1].x, rord.v[2].x));
     minx = fminf(rord.v[0].x, fminf(rord.v[1].x, rord.v[2].x));
     maxy = fmaxf(rord.v[0].y, fmaxf(rord.v[1].y, rord.v[2].y));
     miny = fminf(rord.v[0].y, fminf(rord.v[1].y, rord.v[2].y));
-    maxz = fmaxf(rord.v[0].z, fmaxf(rord.v[1].z, rord.v[2].z));
-    minz = fminf(rord.v[0].z, fminf(rord.v[1].z, rord.v[2].z));
-    
-
-    uv_maxx = fmaxf(uvord.v[0].x, fmaxf(uvord.v[1].x, uvord.v[2].x));
-    uv_minx = fminf(uvord.v[0].x, fminf(uvord.v[1].x, uvord.v[2].x));
-    uv_maxy = fmaxf(uvord.v[0].y, fmaxf(uvord.v[1].y, uvord.v[2].y));
-    uv_miny = fminf(uvord.v[0].y, fminf(uvord.v[1].y, uvord.v[2].y));
     
     /* spanning vectors of edge (rord.v[0],rord.v[1]) and (rord.v[0],rord.v[2]) */
     vs1.x = rord.v[1].x - rord.v[0].x;
@@ -232,10 +223,7 @@ void rasterizeTriangle( struct Triangle * tri, struct Triangle * uv )
             { /* inside triangle */
 		uv_o = bary2cart(uv, cart2bary(tri, x, y));
                 
-		uv_c.x = ((1 - uv_o.x) * (uv_minx / minz) + uv_o.x * (uv_maxx / maxz)) / ((1 - uv_o.x) * (1 / minz) + uv_o.x * (1 / maxz));
-		uv_c.y = ((1 - uv_o.y) * (uv_miny / minz) + uv_o.y * (uv_maxy / maxz)) / ((1 - uv_o.y) * (1 / minz) + uv_o.y * (1 / maxz));
-
-                setPixel(surf, x, y, getPixel(uvsurf, uv_c.x, uv_c.y));
+                setPixel(surf, x, y, getPixel(uvsurf, uv_o.x, uv_o.y));
             }
         }
     }
