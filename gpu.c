@@ -38,87 +38,87 @@ int main( int argc, char ** argv )
 
     struct Triangle test[8] = {
         {{ // Top left
-            {70,  75,  5},
-            {250,250,  1},
-            {250, 25,  1}
+            {70,  75,  5, 1},
+            {250, 250, 1, 1},
+            {250, 25,  1, 1}
         }},
         {{
-            {70,  75,  5},
-            {250, 250, 1},
-            {70,  200, 5}
+            {70,  75,  5, 1},
+            {70,  200, 5, 1},
+            {250, 250, 1, 1}
         }},
         {{ // Bottom left
-            {50,  250, 1},
-            {250, 450, 1},
-            {250, 250, 1}
+            {50,  250, 1, 1},
+            {250, 450, 1, 1},
+            {220, 280, 5, 1}
         }},
         {{
-            {50,  250, 1},
-            {250, 450, 1},
-            {80,  420, 5}
+            {50,  250, 1, 1},
+            {80,  420, 5, 1},
+            {250, 450, 1, 1}
         }},
         {{ // Top right
-            {350, 45,  5},
-            {550, 250, 1},
-            {500, 45,  5}
+            {350,  45, 5, 1},
+            {550, 250, 5, 1},
+            {500,  45, 1, 1}
         }},
         {{
-            {350, 45,  5},
-            {550, 250, 1},
-            {300, 250, 1}
+            {350, 45,  5, 1},
+            {300, 250, 1, 1},
+            {550, 250, 1, 1}
         }},
         {{ // Bottom right
-            {300, 250, 1},
-            {550, 450, 1},
-            {500, 250, 1}
+            {300, 250, 1, 1},
+            {550, 450, 1, 1},
+            {500, 250, 1, 1}
         }},
         {{
-            {300, 250, 1},
-            {550, 450, 1},
-            {350, 450, 1}
+            {300, 250, 1, 1},
+            {350, 450, 1, 1},
+            {550, 450, 1, 1}
         }}
     };
 
     struct Triangle testuv[8] = {
         {{
-            {256, 256, 0},
-            {768, 768, 0},
-            {768, 256, 0}
+            {256, 256, 0, 1},
+            {768, 768, 0, 1},
+            {768, 256, 0, 1}
         }},
         {{
-            {256, 256, 0},
-            {768, 768, 0},
-            {256, 768, 0}
+            {256, 256, 0, 1},
+            {256, 768, 0, 1},
+            {768, 768, 0, 1}
         }},
 	{{
-            {256, 256, 0},
-            {768, 768, 0},
-            {768, 256, 0}
+            {256, 256, 0, 1},
+            {768, 768, 0, 1},
+            {768, 256, 0, 1}
         }},
         {{
-            {256, 256, 0},
-            {768, 768, 0},
-            {256, 768, 0}
+            {256, 256, 0, 1},
+            {256, 768, 0, 1},
+            {768, 768, 0, 1}
         }},
 	{{
-            {256, 256, 0},
-            {768, 768, 0},
-            {768, 256, 0}
+            {256, 256, 0, 1},
+            {768, 768, 0, 1},
+            {768, 256, 0, 1}
         }},
         {{
-            {256, 256, 0},
-            {768, 768, 0},
-            {256, 768, 0}
+            {256, 256, 0, 1},
+            {256, 768, 0, 1},
+            {768, 768, 0, 1}
         }},
 	{{
-            {256, 256, 0},
-            {768, 768, 0},
-            {768, 256, 0}
+            {256, 256, 0, 1},
+            {768, 768, 0, 1},
+            {768, 256, 0, 1}
         }},
         {{
-            {256, 256, 0},
-            {768, 768, 0},
-            {256, 768, 0}
+            {256, 256, 0, 1},
+            {256, 768, 0, 1},
+            {768, 768, 0, 1}
         }}
     };
 
@@ -151,7 +151,7 @@ int main( int argc, char ** argv )
     void inline setPixel(SDL_Surface * s, int x, int y, uint32_t color) { *(uint32_t *)(s->pixels + y * s->pitch + x * sizeof(uint32_t)) = color; }
 uint32_t inline getPixel(SDL_Surface * s, int x, int y) { return *(uint32_t *)(s->pixels + y * s->pitch + x * sizeof(uint32_t)); }
 
-struct Vector cart2bary(struct Triangle * tri, int x, int y)
+struct Vec4 cart2bary(struct Triangle * tri, int x, int y)
 {
     float pxc = x - tri->v[2].x;
     float pyc = y - tri->v[2].y;
@@ -159,7 +159,7 @@ struct Vector cart2bary(struct Triangle * tri, int x, int y)
     float det = (tri->v[1].y - tri->v[2].y) * (tri->v[0].x - tri->v[2].x)
               + (tri->v[2].x - tri->v[1].x) * (tri->v[0].y - tri->v[2].y);
 
-    struct Vector out;
+    struct Vec4 out;
     out.x = ( (tri->v[1].y - tri->v[2].y) * pxc + (tri->v[2].x - tri->v[1].x) * pyc ) / det;
     out.y = ( (tri->v[2].y - tri->v[0].y) * pxc + (tri->v[0].x - tri->v[2].x) * pyc ) / det;
     out.z = 1 - out.x - out.y;
@@ -167,9 +167,9 @@ struct Vector cart2bary(struct Triangle * tri, int x, int y)
     return out;
 }
 
-struct Vector bary2cart(struct Triangle * tri, struct Vector bay )
+struct Vec4 bary2cart(struct Triangle * tri, struct Vec4 bay )
 {
-    struct Vector out;
+    struct Vec4 out;
 
     out.x = tri->v[0].x * bay.x + tri->v[1].x * bay.y + tri->v[2].x * bay.z;
     out.y = tri->v[0].y * bay.x + tri->v[1].y * bay.y + tri->v[2].y * bay.z;
@@ -178,53 +178,73 @@ struct Vector bary2cart(struct Triangle * tri, struct Vector bay )
     return out;
 }
 
-struct Vector crossProduct(struct Vector vecta, struct Vector vectb)
-{
-    struct Vector out;
-
-    out.x = vecta.y * vectb.z - vecta.z * vectb.y;
-    out.y = vecta.z * vectb.x - vecta.x * vectb.z;
-    out.z = vecta.x * vectb.y - vecta.y * vectb.x;
-
-    return out;
-}
-
 void rasterizeTriangle( struct Triangle * tri, struct Triangle * uv )
 {
     int i;
-    float maxx, maxy, minx, miny, s, t;
     struct Triangle rord = *tri;
-    struct Vector vs1, vs2, q, uv_o;
+    struct Vec4 pt, end, uv_o;
 
-    /* get the bounding box of the triangle */
-    maxx = fmaxf(rord.v[0].x, fmaxf(rord.v[1].x, rord.v[2].x));
-    minx = fminf(rord.v[0].x, fminf(rord.v[1].x, rord.v[2].x));
-    maxy = fmaxf(rord.v[0].y, fmaxf(rord.v[1].y, rord.v[2].y));
-    miny = fminf(rord.v[0].y, fminf(rord.v[1].y, rord.v[2].y));
-    
-    /* spanning vectors of edge (rord.v[0],rord.v[1]) and (rord.v[0],rord.v[2]) */
-    vs1.x = rord.v[1].x - rord.v[0].x;
-    vs1.y = rord.v[1].y - rord.v[0].y;
-    vs2.x = rord.v[2].x - rord.v[0].x;
-    vs2.y = rord.v[2].y - rord.v[0].y;
+    // Re-order Vectors so they go top to bottom in y order.
+    if ( rord.v[0].y > rord.v[1].y ) { pt = rord.v[0]; rord.v[0] = rord.v[1]; rord.v[1] = pt; }
+    if ( rord.v[0].y > rord.v[2].y ) { pt = rord.v[0]; rord.v[0] = rord.v[2]; rord.v[2] = pt; }
+    if ( rord.v[1].y > rord.v[2].y ) { pt = rord.v[1]; rord.v[1] = rord.v[2]; rord.v[2] = pt; }
 
-    for (int x = minx; x <= maxx; x++)
+    float ls, rs, cx;
+
+    cx = rord.v[0].x + ((rord.v[1].y - rord.v[0].y)/(rord.v[2].y - rord.v[0].y)) * (rord.v[2].x - rord.v[0].x);
+
+    // Draw top half of triangle
+    if ( rord.v[1].x <= cx )
     {
-        for (int y = miny; y <= maxy; y++)
+        ls  = (rord.v[1].x - rord.v[0].x) / (rord.v[1].y - rord.v[0].y);
+        rs  = (rord.v[2].x - rord.v[0].x) / (rord.v[2].y - rord.v[0].y);
+    }
+    else
+    {
+        rs  = (rord.v[1].x - rord.v[0].x) / (rord.v[1].y - rord.v[0].y);
+        ls  = (rord.v[2].x - rord.v[0].x) / (rord.v[2].y - rord.v[0].y);
+    }
+    //printf("Slope top rs:%f ls:%f\n", rs, ls);
+
+    for ( end = pt = rord.v[0]; pt.y <= rord.v[1].y; pt.y++ )
+    {
+        if ( end.x > pt.x )
         {
-            q.x = x - rord.v[0].x;
-	    q.y = y - rord.v[0].y;
-	    q.z = 0;
-            
-            s = crossProduct(q, vs2).z / crossProduct(vs1, vs2).z;
-            t = crossProduct(vs1, q).z / crossProduct(vs1, vs2).z;
-            
-            if ( (s >= 0) && (t >= 0) && (s + t <= 1) )
-            { /* inside triangle */
-		uv_o = bary2cart(uv, cart2bary(tri, x, y));
-                
-                setPixel(surf, x, y, getPixel(uvsurf, uv_o.x, uv_o.y));
+            // Draw line
+            for ( i = pt.x; i <= end.x; i++ )
+            {
+                uv_o = bary2cart(uv, cart2bary(tri, i, pt.y));
+                setPixel( surf, i, pt.y, getPixel( uvsurf, uv_o.x, uv_o.y ) );
             }
         }
+
+        pt.x += ls;  end.x += rs;
+    }
+
+    // Draw bottom half of triangle
+    if ( cx < rord.v[1].x )
+    {
+        ls  = (rord.v[0].x - rord.v[2].x) / (rord.v[0].y - rord.v[2].y);
+        rs  = (rord.v[1].x - rord.v[2].x) / (rord.v[1].y - rord.v[2].y);
+    }
+    else
+    {
+        rs  = (rord.v[0].x - rord.v[2].x) / (rord.v[0].y - rord.v[2].y);
+        ls  = (rord.v[1].x - rord.v[2].x) / (rord.v[1].y - rord.v[2].y);
+    }
+    //printf("Slope bottom rs:%f ls:%f\n", rs, ls);
+    for ( end = pt = rord.v[2]; pt.y >= rord.v[1].y; pt.y-- )
+    {
+        if ( end.x > pt.x )
+        {
+            // Draw line
+            for ( i = pt.x; i <= end.x; i++ )
+            {
+                uv_o = bary2cart(uv, cart2bary(tri, i, pt.y));
+                setPixel( surf, i, pt.y, getPixel( uvsurf, uv_o.x, uv_o.y ) );
+            }
+        }
+
+        pt.x -= ls;  end.x -= rs;
     }
 }

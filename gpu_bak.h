@@ -6,12 +6,13 @@
 #define SCREEN_WIDTH  640
 #define SCREEN_HEIGHT 480
 
-struct Vec4 { float x, y, z, w; };
+struct Vector { float x, y, z; };
 
-// Points define a triangle
-struct Triangle { struct Vec4 v[3]; };
+// Points define a clockwise triangle
+struct Triangle { struct Vector v[3]; };
 
     void setPixel(SDL_Surface * s, int x, int y, uint32_t color);
 uint32_t getPixel(SDL_Surface * s, int x, int y);
+   float edgeFunction(struct Vector a, struct Vector b, struct Vector c); 
 void rasterizeTriangle(struct Triangle * tri, struct Triangle * uv);
 
