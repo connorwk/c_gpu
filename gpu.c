@@ -7,9 +7,9 @@ SDL_Surface * uvsurf = NULL;
 
 struct Camera camera = {
     // X, Y, Z
-    5,5,-14,
+    20,20,-12,
     // Pitch, Yaw, Roll
-    0,0,0
+    -0.7,-0.7,1.57
 };
 
 float FOV = 1;
@@ -46,17 +46,17 @@ int main( int argc, char ** argv )
     SDL_UpdateWindowSurface( uvwind );
 
     struct Triangle test[8] = {
-        {{ // Top left
+        {{ // Left
             {0, 0,  0},
-            {10, 0,  10},
-            {0, 0,  10}
+            {0, 0,  10},
+            {10, 0,  10}
         }},
         {{
             {0, 0,  0},
-            {10, 0,  10},
-            {10, 0,  0}
+            {10, 0,  0},
+            {10, 0,  10}
         }},
-        {{ // Bottom left
+        {{ // Bottom
             {0, 0,  0},
             {0, 10,  0},
             {0, 10,  10}
@@ -66,7 +66,7 @@ int main( int argc, char ** argv )
             {0, 10,  10},
             {0, 0,  10}
         }},
-        {{ // Top right
+        {{ // Right
             {0, 0,  10},
             {10, 10,  10},
             {10, 0,  10}
@@ -76,7 +76,7 @@ int main( int argc, char ** argv )
             {0, 10,  10},
             {10, 10,  10}
         }},
-        {{ // Bottom right
+        {{ // Top
             {10, 0,  0},
             {10, 0,  10},
             {10, 10,  10}
@@ -90,48 +90,48 @@ int main( int argc, char ** argv )
 
     struct TextureTri testuv[8] = {
         {{
-            {256, 256},
-            {768, 768},
-            {768, 256}
+            {512, 0},
+            {512, 512},
+            {0, 512}
         }},
         {{
-            {256, 256},
-            {256, 768},
-            {768, 768}
+            {512, 0},
+            {0, 0},
+            {0, 512}
         }},
 	{{
-            {256, 256},
-            {768, 768},
-            {768, 256}
+            {0, 0},
+            {512, 512},
+            {512, 0}
         }},
         {{
-            {256, 256},
-            {256, 768},
-            {768, 768}
+            {0, 512},
+            {0, 0},
+            {512, 512}
         }},
 	{{
-            {256, 256},
-            {768, 768},
-            {768, 256}
+            {512, 0},
+            {0, 0},
+            {512, 512}
         }},
         {{
-            {256, 256},
-            {256, 768},
-            {768, 768}
+            {0, 0},
+            {512, 512},
+            {0, 512}
         }},
 	{{
-            {256, 256},
-            {768, 768},
-            {768, 256}
+            {0, 512},
+            {0, 0},
+            {512, 512}
         }},
         {{
-            {256, 256},
-            {256, 768},
-            {768, 768}
-        }}
+            {0, 0},
+            {512, 512},
+            {512, 0}
+        }},
     };
 
-    for ( int i = 0; i < 6; i++ )
+    for ( int i = 0; i < 8; i++ )
     {
         rasterizeTriangle(test + i, testuv + i);
     }
@@ -227,8 +227,10 @@ void rasterizeTriangle( struct Triangle * tri, struct TextureTri * uv )
 {
     int i;
     struct Triangle inTri = *tri;
+    struct TextureTri inUV = *uv;
     struct Triangle rord;
     struct Vec3 pt, end, uv_o, test;
+    struct Vec2 pu;
 
     int px, py;
     int render = 0;
@@ -254,9 +256,9 @@ void rasterizeTriangle( struct Triangle * tri, struct TextureTri * uv )
     }
 
     // Re-order Vectors so they go top to bottom in y order.
-    if ( rord.v[0].y > rord.v[1].y ) { pt = rord.v[0]; rord.v[0] = rord.v[1]; rord.v[1] = pt; }
-    if ( rord.v[0].y > rord.v[2].y ) { pt = rord.v[0]; rord.v[0] = rord.v[2]; rord.v[2] = pt; }
-    if ( rord.v[1].y > rord.v[2].y ) { pt = rord.v[1]; rord.v[1] = rord.v[2]; rord.v[2] = pt; }
+    if ( rord.v[0].y > rord.v[1].y ) { pt = rord.v[0]; rord.v[0] = rord.v[1]; rord.v[1] = pt; pu = inUV.v[0]; inUV.v[0] = inUV.v[1]; inUV.v[1] = pu; }
+    if ( rord.v[0].y > rord.v[2].y ) { pt = rord.v[0]; rord.v[0] = rord.v[2]; rord.v[2] = pt; pu = inUV.v[0]; inUV.v[0] = inUV.v[2]; inUV.v[2] = pu; }
+    if ( rord.v[1].y > rord.v[2].y ) { pt = rord.v[1]; rord.v[1] = rord.v[2]; rord.v[2] = pt; pu = inUV.v[1]; inUV.v[1] = inUV.v[2]; inUV.v[2] = pu; }
 
     float ls, rs, cx;
 
@@ -310,7 +312,6 @@ void rasterizeTriangle( struct Triangle * tri, struct TextureTri * uv )
             // Draw line
             for ( i = pt.x; i <= end.x; i++ )
             {
-                test = cart2bary(&rord, i, pt.y);
                 uv_o = bary2cart(uv, cart2bary(&rord, i, pt.y));
                 setPixel( surf, i, pt.y, getPixel( uvsurf, uv_o.x, uv_o.y ) );
                 //printf("UV: u: %f v: %f u: %f v: %f\n", test.x, test.y, uv_o.x, uv_o.y);
