@@ -5,6 +5,15 @@ SDL_Surface * surf = NULL;
 SDL_Window * uvwind = NULL;
 SDL_Surface * uvsurf = NULL;
 
+struct Camera camera = {
+    // X, Y, Z
+    5,5,-14,
+    // Pitch, Yaw, Roll
+    0,0,0
+};
+
+float FOV = 1;
+
 int main( int argc, char ** argv )
 {
     if ( SDL_Init( SDL_INIT_VIDEO ) < 0 ) { printf( "SDL Init fail, error: %s\n", SDL_GetError() ); return 0; }
@@ -38,91 +47,91 @@ int main( int argc, char ** argv )
 
     struct Triangle test[8] = {
         {{ // Top left
-            {70,  75,  5, 1},
-            {250, 250, 1, 1},
-            {250, 25,  1, 1}
+            {0, 0,  0},
+            {10, 0,  10},
+            {0, 0,  10}
         }},
         {{
-            {70,  75,  5, 1},
-            {70,  200, 5, 1},
-            {250, 250, 1, 1}
+            {0, 0,  0},
+            {10, 0,  10},
+            {10, 0,  0}
         }},
         {{ // Bottom left
-            {50,  250, 1, 1},
-            {250, 450, 1, 1},
-            {220, 280, 5, 1}
+            {0, 0,  0},
+            {0, 10,  0},
+            {0, 10,  10}
         }},
         {{
-            {50,  250, 1, 1},
-            {80,  420, 5, 1},
-            {250, 450, 1, 1}
+            {0, 0,  0},
+            {0, 10,  10},
+            {0, 0,  10}
         }},
         {{ // Top right
-            {350,  45, 5, 1},
-            {550, 250, 5, 1},
-            {500,  45, 1, 1}
+            {0, 0,  10},
+            {10, 10,  10},
+            {10, 0,  10}
         }},
         {{
-            {350, 45,  5, 1},
-            {300, 250, 1, 1},
-            {550, 250, 1, 1}
+            {0, 0,  10},
+            {0, 10,  10},
+            {10, 10,  10}
         }},
         {{ // Bottom right
-            {300, 250, 1, 1},
-            {550, 450, 1, 1},
-            {500, 250, 1, 1}
+            {10, 0,  0},
+            {10, 0,  10},
+            {10, 10,  10}
         }},
         {{
-            {300, 250, 1, 1},
-            {350, 450, 1, 1},
-            {550, 450, 1, 1}
+            {10, 0,  0},
+            {10, 10,  10},
+            {10, 10,  0}
         }}
     };
 
-    struct Triangle testuv[8] = {
+    struct TextureTri testuv[8] = {
         {{
-            {256, 256, 0, 1},
-            {768, 768, 0, 1},
-            {768, 256, 0, 1}
+            {256, 256},
+            {768, 768},
+            {768, 256}
         }},
         {{
-            {256, 256, 0, 1},
-            {256, 768, 0, 1},
-            {768, 768, 0, 1}
+            {256, 256},
+            {256, 768},
+            {768, 768}
         }},
 	{{
-            {256, 256, 0, 1},
-            {768, 768, 0, 1},
-            {768, 256, 0, 1}
+            {256, 256},
+            {768, 768},
+            {768, 256}
         }},
         {{
-            {256, 256, 0, 1},
-            {256, 768, 0, 1},
-            {768, 768, 0, 1}
+            {256, 256},
+            {256, 768},
+            {768, 768}
         }},
 	{{
-            {256, 256, 0, 1},
-            {768, 768, 0, 1},
-            {768, 256, 0, 1}
+            {256, 256},
+            {768, 768},
+            {768, 256}
         }},
         {{
-            {256, 256, 0, 1},
-            {256, 768, 0, 1},
-            {768, 768, 0, 1}
+            {256, 256},
+            {256, 768},
+            {768, 768}
         }},
 	{{
-            {256, 256, 0, 1},
-            {768, 768, 0, 1},
-            {768, 256, 0, 1}
+            {256, 256},
+            {768, 768},
+            {768, 256}
         }},
         {{
-            {256, 256, 0, 1},
-            {256, 768, 0, 1},
-            {768, 768, 0, 1}
+            {256, 256},
+            {256, 768},
+            {768, 768}
         }}
     };
 
-    for ( int i = 0; i < 8; i++ )
+    for ( int i = 0; i < 6; i++ )
     {
         rasterizeTriangle(test + i, testuv + i);
     }
@@ -151,7 +160,7 @@ int main( int argc, char ** argv )
     void inline setPixel(SDL_Surface * s, int x, int y, uint32_t color) { *(uint32_t *)(s->pixels + y * s->pitch + x * sizeof(uint32_t)) = color; }
 uint32_t inline getPixel(SDL_Surface * s, int x, int y) { return *(uint32_t *)(s->pixels + y * s->pitch + x * sizeof(uint32_t)); }
 
-struct Vec4 cart2bary(struct Triangle * tri, int x, int y)
+struct Vec3 cart2bary(struct Triangle * tri, int x, int y)
 {
     float pxc = x - tri->v[2].x;
     float pyc = y - tri->v[2].y;
@@ -159,7 +168,7 @@ struct Vec4 cart2bary(struct Triangle * tri, int x, int y)
     float det = (tri->v[1].y - tri->v[2].y) * (tri->v[0].x - tri->v[2].x)
               + (tri->v[2].x - tri->v[1].x) * (tri->v[0].y - tri->v[2].y);
 
-    struct Vec4 out;
+    struct Vec3 out;
     out.x = ( (tri->v[1].y - tri->v[2].y) * pxc + (tri->v[2].x - tri->v[1].x) * pyc ) / det;
     out.y = ( (tri->v[2].y - tri->v[0].y) * pxc + (tri->v[0].x - tri->v[2].x) * pyc ) / det;
     out.z = 1 - out.x - out.y;
@@ -167,9 +176,9 @@ struct Vec4 cart2bary(struct Triangle * tri, int x, int y)
     return out;
 }
 
-struct Vec4 bary2cart(struct Triangle * tri, struct Vec4 bay )
+struct Vec3 bary2cart(struct TextureTri * tri, struct Vec3 bay )
 {
-    struct Vec4 out;
+    struct Vec3 out;
 
     out.x = tri->v[0].x * bay.x + tri->v[1].x * bay.y + tri->v[2].x * bay.z;
     out.y = tri->v[0].y * bay.x + tri->v[1].y * bay.y + tri->v[2].y * bay.z;
@@ -178,11 +187,71 @@ struct Vec4 bary2cart(struct Triangle * tri, struct Vec4 bay )
     return out;
 }
 
-void rasterizeTriangle( struct Triangle * tri, struct Triangle * uv )
+struct Vec3 projectPoint(struct Vec3 Point) {
+    struct Vec3 t, c, s, d, out;
+    float ez, bx, by;
+
+    t.x = Point.x - camera.x;
+    t.y = Point.y - camera.y;
+    t.z = Point.z - camera.z;
+
+    c.x = cos(camera.pitch);
+    c.y = cos(camera.yaw);
+    c.z = cos(camera.roll);
+
+    s.x = sin(camera.pitch);
+    s.y = sin(camera.yaw);
+    s.z = sin(camera.roll);
+
+    d.x = c.y * (s.z * t.y + c.z * t.x) - s.y * t.z;
+    d.y = s.x * (c.y * t.z + s.y * (s.z * t.y + c.z * t.x)) + c.x * (c.z * t.y - s.z * t.x);
+    out.z = c.x * (c.y * t.z + s.y * (s.z * t.y + c.z * t.x)) - s.x * (c.z * t.y - s.z * t.x);
+
+    ez = 1.0 / tan(FOV / 2.0);
+
+    bx = ez / out.z * d.x;
+    by = ez / out.z * d.y;
+
+    if (out.z < 0) {
+        bx = -bx;
+        by = -by;
+    }
+
+    out.x = (int) (SCREEN_WIDTH + bx * SCREEN_HEIGHT) / 2;
+    out.y = (int) (SCREEN_HEIGHT + by * SCREEN_HEIGHT) / 2;
+
+    return out;
+}
+
+void rasterizeTriangle( struct Triangle * tri, struct TextureTri * uv )
 {
     int i;
-    struct Triangle rord = *tri;
-    struct Vec4 pt, end, uv_o;
+    struct Triangle inTri = *tri;
+    struct Triangle rord;
+    struct Vec3 pt, end, uv_o, test;
+
+    int px, py;
+    int render = 0;
+
+    rord.v[0] = projectPoint(inTri.v[0]);
+    px = (int) rord.v[0].x;
+    py = (int) rord.v[0].y;
+    //printf("P1 x:%i y:%i\n", px, py);
+    render |= px >= 0 && px < SCREEN_WIDTH && py >= 0 && py < SCREEN_HEIGHT;
+    rord.v[1] = projectPoint(inTri.v[1]);
+    px = (int) rord.v[1].x;
+    py = (int) rord.v[1].y;
+    //printf("P2 x:%i y:%i\n", px, py);
+    render |= px >= 0 && px < SCREEN_WIDTH && py >= 0 && py < SCREEN_HEIGHT;
+    rord.v[2] = projectPoint(inTri.v[2]);
+    px = (int) rord.v[2].x;
+    py = (int) rord.v[2].y;
+    //printf("P3 x:%i y:%i\n", px, py);
+    render |= px >= 0 && px < SCREEN_WIDTH && py >= 0 && py < SCREEN_HEIGHT;
+
+    if (!render) {
+        return;
+    }
 
     // Re-order Vectors so they go top to bottom in y order.
     if ( rord.v[0].y > rord.v[1].y ) { pt = rord.v[0]; rord.v[0] = rord.v[1]; rord.v[1] = pt; }
@@ -213,8 +282,9 @@ void rasterizeTriangle( struct Triangle * tri, struct Triangle * uv )
             // Draw line
             for ( i = pt.x; i <= end.x; i++ )
             {
-                uv_o = bary2cart(uv, cart2bary(tri, i, pt.y));
+                uv_o = bary2cart(uv, cart2bary(&rord, i, pt.y));
                 setPixel( surf, i, pt.y, getPixel( uvsurf, uv_o.x, uv_o.y ) );
+                //setPixel( surf, i, pt.y, 0x0000FF );
             }
         }
 
@@ -240,8 +310,11 @@ void rasterizeTriangle( struct Triangle * tri, struct Triangle * uv )
             // Draw line
             for ( i = pt.x; i <= end.x; i++ )
             {
-                uv_o = bary2cart(uv, cart2bary(tri, i, pt.y));
+                test = cart2bary(&rord, i, pt.y);
+                uv_o = bary2cart(uv, cart2bary(&rord, i, pt.y));
                 setPixel( surf, i, pt.y, getPixel( uvsurf, uv_o.x, uv_o.y ) );
+                //printf("UV: u: %f v: %f u: %f v: %f\n", test.x, test.y, uv_o.x, uv_o.y);
+                //setPixel( surf, i, pt.y, 0xFF0000 );
             }
         }
 
